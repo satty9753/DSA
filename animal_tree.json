@@ -1,0 +1,27 @@
+{
+    "question": "Does it live in water?",
+    "yes": {
+        "animal": "Fish"
+    },
+    "no": {
+        "question": "Can it fly?",
+        "yes": {
+            "animal": "Bird"
+        },
+        "no": {
+            "question": "Does it have legs?",
+            "yes": {
+                "question": "Does it bark?",
+                "yes": {
+                    "animal": "Dog"
+                },
+                "no": {
+                    "animal": "Cat"
+                }
+            },
+            "no": {
+                "animal": "snake"
+            }
+        }
+    }
+}
