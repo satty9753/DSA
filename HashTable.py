@@ -11,17 +11,21 @@ Step 2: Implement the LinkedList class for collision handling in the hash table.
 Step 3: Implement the HashTable class with methods for insertion, retrieval, and deletion. HashTable class is probably a list of LinkedLists.
 Step 4: Write unit tests to verify the functionality of your cache system.
 """
-BUCKET_SIZE = 10
-
 class Node:
     def __init__(self, key, value, next=None):
         self.key = key
         self.value = value
-        self.next = None
+        self.next = next
 
 class LinkedList:
     def __init__(self):
         self.head = None
+
+    def __iter__(self):
+        curr = self.head
+        while curr:
+            yield curr
+            curr = curr.next
 
     def update(self, node):
         if not self.head:
@@ -58,39 +62,39 @@ class LinkedList:
             curr = curr.next
         return False
     
-class Hash(object):
+class HashTable(object):
     def __init__(self, bucket):
         # Number of buckets
         self.__bucket = bucket
         # Hash table of size bucket
         self.__table = [LinkedList() for _ in range(bucket)]
 
-    # hash function to map values to key
-    def hashFunction(self, node):
-        return (hash(node) % self.__bucket)
+    # hash function to map keys to bucket index
+    def hashFunction(self, key):
+        return (hash(key) % self.__bucket)
 
-    def insertItem(self, node):
+    def insert(self, node):
         # get the hash index of key
-        index = self.hashFunction(node)
+        index = self.hashFunction(node.key)
         self.__table[index].update(node)
 
-    def deleteItem(self, key):
-        # get the hash index of key
+    def delete(self, key):
         index = self.hashFunction(key)
-        # Check the key in the hash table
         if not self.__table[index].find(key):
             return
-        # delete the key from hash table
         self.__table[index].delete(key)
+    
+    def get(self, key):
+        index = self.hashFunction(key)
+        node = self.__table[index].find(key)
+        if node is not None:
+            return node.value
+        else:
+            return None
 
-    # function to display hash table
     def displayHash(self):
         for i in range(self.__bucket):
             print("[%d]" % i, end='')
             for x in self.__table[i]:
                 print(" --> %d" % x, end='')
             print()
-
-
-node = Node("a", 1)
-print(hash(node))
