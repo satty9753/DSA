@@ -3,22 +3,24 @@ import unittest
 
 class HashTableTestCase(unittest.TestCase):
     def setUp(self):
-        self.hashTable = HashTable(10)
-        self.test_addCache()
+        self.hashTable = HashTable(8)
 
     def test_addCache(self):
         cache = Node(key="fakeUrl", value="fakeImage")
         self.hashTable.insert(cache)
     
     def test_getCache(self):
+        self.test_addCache()
         self.assertEqual(self.hashTable.get("fakeUrl"), "fakeImage")
     
     def test_updateCache(self):
+        self.test_addCache()
         updatedCache = Node(key="fakeUrl", value="newFakeImage")
         self.hashTable.insert(updatedCache)
         self.assertEqual(self.hashTable.get("fakeUrl"), "newFakeImage")
     
     def test_deleteCache(self):
+        self.test_addCache()
         self.hashTable.delete("fakeUrl")
         self.assertIsNone(self.hashTable.get("fakeUrl"))
     
@@ -34,6 +36,12 @@ class HashTableTestCase(unittest.TestCase):
         self.hashTable.insert(Node(key=key2, value=value2))
         self.assertEqual(self.hashTable.get(key1), value1)
         self.assertEqual(self.hashTable.get(key2), value2)
+
+    def test_collisionFor16Nodes(self):
+        for i in range(16):
+            self.hashTable.insert(Node(key=f"key{i*10}", value=f"value{i}"))
+        for i in range(16):
+            self.assertEqual(self.hashTable.get(f"key{i*10}"), f"value{i}") 
     
     def test_deleteNonexistentKey(self):
         self.hashTable.delete("nonexistentKey")
@@ -49,6 +57,17 @@ class HashTableTestCase(unittest.TestCase):
         self.assertIsNone(self.hashTable.get("k2"))
         self.hashTable.insert(Node(key="k2", value="v2_new"))
         self.assertEqual(self.hashTable.get("k2"), "v2_new")
+
+    def test_resize(self):
+        N = 40  
+        for i in range(N):
+            self.hashTable.insert(Node(f"k{i}", i))
+        new_buckets = self.hashTable.getBucketSize()
+        self.assertGreaterEqual(new_buckets, 10)
+
+        # 取值都還在
+        for i in range(N):
+            self.assertEqual(self.hashTable.get(f"k{i}"), i)
 
 if __name__ == "__main__":
     unittest.main()

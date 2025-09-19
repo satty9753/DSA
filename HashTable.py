@@ -1,16 +1,3 @@
-"""
-Instructions:
-The objective of this assignment is to deepen your understanding of hash tables by implementing a simple cache system. You will create a cache that efficiently stores and retrieves data using a hash table and handles collisions effectively. Implement the cache system from scratch without using Python’s built-in dictionary for the core functionality.
-Implement a hash table with the following functionalities:
-Put: Insert a key-value pair into the cache.
-Get: Retrieve the value associated with a key.
-Delete: Remove a key-value pair from the cache.
-Implementation Steps:
-Step 1: Implement the Node class to store key-value pairs.
-Step 2: Implement the LinkedList class for collision handling in the hash table.
-Step 3: Implement the HashTable class with methods for insertion, retrieval, and deletion. HashTable class is probably a list of LinkedLists.
-Step 4: Write unit tests to verify the functionality of your cache system.
-"""
 class Node:
     def __init__(self, key, value, next=None):
         self.key = key
@@ -28,17 +15,20 @@ class LinkedList:
             curr = curr.next
 
     def update(self, node):
-        if not self.head:
-            self.head = node
-            return
-        existedNode = self.find(node.key)
-        if existedNode:
-            existedNode.value = node.value
+        prev = None
+        curr = self.head
+        while curr:
+            if curr.key == node.key:
+                curr.value = node.value
+                return False
+            prev = curr
+            curr = curr.next
+        newNode = Node(node.key, node.value, next=None)
+        if self.head is None:
+            self.head = newNode
         else:
-            curr = self.head
-            while curr.next:
-                curr = curr.next
-            curr.next = node
+            prev.next = newNode
+        return True
 
     def find(self, key):
         curr = self.head
@@ -68,6 +58,16 @@ class HashTable(object):
         self.__bucket = bucket
         # Hash table of size bucket
         self.__table = [LinkedList() for _ in range(bucket)]
+        self.maxinumLoadFactor = 0.75
+        self.minimumLoadFactor = 0.25
+        self.__size = 0
+        self.__min_bucket = self.__bucket
+    
+    def getBucketSize(self):
+        return self.__bucket
+    
+    def load_factor(self):
+        return self.__size / self.__bucket if self.__bucket else 0.0
 
     # hash function to map keys to bucket index
     def hashFunction(self, key):
@@ -76,13 +76,23 @@ class HashTable(object):
     def insert(self, node):
         # get the hash index of key
         index = self.hashFunction(node.key)
-        self.__table[index].update(node)
+        newNode = self.__table[index].update(node)
+        if newNode:
+            self.__size += 1
+            # Check load factor and rehash if necessary
+            if self.load_factor() > self.maxinumLoadFactor:
+                self.__rehash(self.__bucket * 2)
 
     def delete(self, key):
         index = self.hashFunction(key)
         if not self.__table[index].find(key):
             return
-        self.__table[index].delete(key)
+        hasDeleted = self.__table[index].delete(key)
+        if hasDeleted:
+            self.__size -= 1
+            # Check load factor and rehash if necessary
+            if (self.load_factor() < self.minimumLoadFactor and self.__bucket > self.__min_bucket):
+                self.__rehash(self.__bucket // 2)
     
     def get(self, key):
         index = self.hashFunction(key)
@@ -91,3 +101,40 @@ class HashTable(object):
             return node.value
         else:
             return None
+        
+    def display(self):
+        for i, ll in enumerate(self.__table):
+            print(f"Bucket {i}: ", end="")
+            for node in ll:
+                print(f"({node.key}: {node.value}) -> ", end="")
+            print("None")
+        
+    def __rehash(self, bucketSize):
+        new_bucket = max(1, int(bucketSize))
+        oldTable = self.__table
+
+        self.__bucket = new_bucket
+        self.__table = [LinkedList() for _ in range(self.__bucket)]
+
+        for ll in oldTable:
+            cur = ll.head
+            while cur is not None:
+                next = cur.next        
+                cur.next = None       
+                idx = self.hashFunction(cur.key)  
+                cur.next = self.__table[idx].head
+                self.__table[idx].head = cur
+                cur = next
+
+
+hashTable = HashTable(10)
+for i in range(5):
+    hashTable.insert(Node(key=f"key{i}", value=f"value{i}"))
+
+hashTable.insert(Node(key="key6", value="newValue6"))
+hashTable.delete("key1")
+print(hashTable.get("key1")) # None
+hashTable.insert(Node(key="key3", value="value100"))
+print(hashTable.get("key3")) # value100
+
+hashTable.display()
