@@ -91,10 +91,3 @@ class HashTable(object):
             return node.value
         else:
             return None
-
-    def displayHash(self):
-        for i in range(self.__bucket):
-            print("[%d]" % i, end='')
-            for x in self.__table[i]:
-                print(" --> %d" % x, end='')
-            print()
