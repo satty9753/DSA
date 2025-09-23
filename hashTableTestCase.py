@@ -64,8 +64,7 @@ class HashTableTestCase(unittest.TestCase):
             self.hashTable.insert(Node(f"k{i}", i))
         new_buckets = self.hashTable.getBucketSize()
         self.assertGreaterEqual(new_buckets, 10)
-
-        # 取值都還在
+        
         for i in range(N):
             self.assertEqual(self.hashTable.get(f"k{i}"), i)
 

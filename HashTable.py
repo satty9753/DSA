@@ -125,16 +125,3 @@ class HashTable(object):
                 cur.next = self.__table[idx].head
                 self.__table[idx].head = cur
                 cur = next
-
-
-hashTable = HashTable(10)
-for i in range(5):
-    hashTable.insert(Node(key=f"key{i}", value=f"value{i}"))
-
-hashTable.insert(Node(key="key6", value="newValue6"))
-hashTable.delete("key1")
-print(hashTable.get("key1")) # None
-hashTable.insert(Node(key="key3", value="value100"))
-print(hashTable.get("key3")) # value100
-
-hashTable.display()
